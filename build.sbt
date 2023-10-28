@@ -1,6 +1,6 @@
 organization := "com.typeduke"
 
-name := "scala-sbt-codespaces-template"
+name := "rock-the-jvm-advanced-scala-3-and-fp"
 
 version := "0.0.1"
 
