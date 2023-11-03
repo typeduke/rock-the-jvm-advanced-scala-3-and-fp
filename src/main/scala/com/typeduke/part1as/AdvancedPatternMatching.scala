@@ -4,13 +4,13 @@ import java.{util => ju}
 
 object AdvancedPatternMatching {
   // We know we can use pattern matching with:
-  // - constants
-  // - objects
-  // - wildcards
-  // - variables
-  // - infix patterns
-  // - lists
-  // - case classes
+  // - Constants
+  // - Objects
+  // - Wildcards
+  // - Variables
+  // - Infix patterns
+  // - Lists
+  // - Case classes
   // - etc.
 
   class Person(val name: String, val age: Int)
