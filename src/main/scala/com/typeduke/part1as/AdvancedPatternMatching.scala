@@ -1,7 +1,5 @@
 package com.typeduke.part1as
 
-import java.{util => ju}
-
 object AdvancedPatternMatching {
   // We know we can use pattern matching with:
   // - Constants
