@@ -22,33 +22,45 @@ abstract class FSet[A] extends (A => Boolean) {
   infix def &(other: FSet[A]): FSet[A]
 
   // "Negation" := All the elements of type `A` except the ones in this set
-  def unary_! : FSet[A]
+  def unary_! : FSet[A] = new PBSet(x => !this.contains(x))
 }
 
 // Property-based set
 // Example: { x in N | x % 2 == 0 }
 class PBSet[A](property: A => Boolean) extends FSet[A] {
-  override def contains(elem: A): Boolean = this.property(elem)
+  override def contains(elem: A): Boolean =
+    this.property(elem)
 
-  // Continue here:
-  // Advanced Functional Programming - The Functional Set, Level 2 - 17:30
+  override infix def +(elem: A): FSet[A] =
+    new PBSet(x => x == elem || this.property(x))
 
-  override infix def +(elem: A): FSet[A] = ???
-  override infix def ++(other: FSet[A]): FSet[A] = ???
+  override infix def ++(other: FSet[A]): FSet[A] =
+    new PBSet(x => this.property(x) || other(x))
 
-  override def map[B](f: A => B): FSet[B] = ???
-  override def flatMap[B](f: A => FSet[B]): FSet[B] = ???
-  override def filter(predicate: A => Boolean): FSet[A] = ???
-  override def foreach(f: A => Unit): Unit = ???
+  override def map[B](f: A => B): FSet[B] =
+    this.politelyFail()
 
-  override infix def -(elem: A): FSet[A] = ???
-  override infix def --(other: FSet[A]): FSet[A] = ???
-  override infix def &(other: FSet[A]): FSet[A] = ???
+  override def flatMap[B](f: A => FSet[B]): FSet[B] =
+    this.politelyFail()
 
-  override def unary_! : FSet[A]
+  override def filter(predicate: A => Boolean): FSet[A] =
+    new PBSet(x => this.property(x) && predicate(x))
+
+  override def foreach(f: A => Unit): Unit =
+    politelyFail()
+
+  override infix def -(elem: A): FSet[A] =
+    this.filter(x => x != elem)
+
+  override infix def --(other: FSet[A]): FSet[A] =
+    this.filter(!other)
+
+  override infix def &(other: FSet[A]): FSet[A] =
+    new PBSet(x => !property(x))
+
+  private def politelyFail() =
+    throw new RuntimeException("I don't know if this set is iterable.")
 }
-
-case class AllInclusiveSet[A]() extends PBSet[A](_ => true)
 
 case class Empty[A]() extends FSet[A] {
   override def contains(elem: A) = false
@@ -64,8 +76,6 @@ case class Empty[A]() extends FSet[A] {
   override infix def -(elem: A): FSet[A] = this
   override infix def --(other: FSet[A]): FSet[A] = this
   override infix def &(other: FSet[A]): FSet[A] = this
-
-  override def unary_! : FSet[A] = AllInclusiveSet()
 }
 
 case class Cons[A](head: A, tail: FSet[A]) extends FSet[A] {
@@ -138,5 +148,11 @@ object FunctionalSetPlayground {
     println((firstFive - 3).contains(3)) // false
     println((firstFive -- someNumbers). contains(4)) // false
     println((firstFive & someNumbers).contains(4)) // true
+
+    val naturals = new PBSet[Int](_ => true)
+    println(naturals.contains(5237548)) // true
+    println(!naturals.contains(0)) // false
+    println((!naturals + 1 + 2 + 3).contains(3)) // true
+    // println(!naturals.map(_ + 1)) // Throws a `Runtime Exception`
   }
 }
