@@ -23,18 +23,56 @@ object CurryingPAFs {
 
   // Underscores are powerful, as they allow the shaping of lambdas obtained from methods.
   def concatenator(a: String, b: String, c: String): String = a + b + c
-  
+
   val insertName = concatenator("Hi, I'm ", _: String, ". I'm gonna show you a nice Scala trick.")
   val insertTheBlanks = concatenator(_: String, "Daniel", _: String)
 
   val danielsGreeting = insertName("Daniel")
   val danielsGreeting2 = insertTheBlanks("Hi, ", ", how are you?")
 
+  // Three addition functions/methods
+  val simpleAddFunction = (x: Int, y: Int) => x + y
+  def simpleAddMethod(x: Int, y: Int) = x + y
+  def curriedAddMethod(x: Int)(y: Int) = x + y
+
+  /* Exercise 1
+   * Obtain an `addSeven` function from each of the three addition functions/methods.
+   */
+
+  val addSeven = (x: Int) => simpleAddFunction(x, 7)
+  val addSeven2 = (x: Int) => simpleAddMethod(x, 7)
+  val addSeven3 = (x: Int) => curriedAddMethod(7)(x)
+  val addSeven4 = curriedAddMethod(7)
+  val addSeven5 = simpleAddMethod(7, _)
+  val addSeven6 = simpleAddMethod(_, 7)
+  val addSeven7 = simpleAddFunction.curried(7)
+
+  /* Exercise 2
+   * Process a list of numbers and return their string representations in different formats.
+   *
+   * Step 1: Create a curried formatting method with a formatting string and a value.
+   * Step 2: Process a list of numbers with various formats.
+   */
+
+  val piWithTwoDec = "%1.2f".format(Math.PI) // 3.14
+
+  def curriedFormatter(fmt: String)(number: Double): String = fmt.format(number)
+  val someDecimals = List(Math.PI, Math.E, 1, 9.8, 1.3e-12)
+
+  val formattedDecimals = someDecimals.map(curriedFormatter("%4.2f"))
+  val formattedDecimals2 = someDecimals.map(curriedFormatter("%8.6f"))
+  val formattedDecimals3 = someDecimals.map(curriedFormatter("%16.14f"))
+
   // Continue here:
-  // Advanced Functional Programming - Currying and Partially Applied Functions - 12:00
+  // Advanced Functional Programming - Currying and Partially Applied Functions - 23:00
 
   def main(args: Array[String]): Unit = {
     println(danielsGreeting)
     println(danielsGreeting2)
+
+    println(piWithTwoDec)
+    println(formattedDecimals)
+    println(formattedDecimals2)
+    println(formattedDecimals3)
   }
 }
