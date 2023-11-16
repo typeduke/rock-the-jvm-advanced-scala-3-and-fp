@@ -63,8 +63,25 @@ object CurryingPAFs {
   val formattedDecimals2 = someDecimals.map(curriedFormatter("%8.6f"))
   val formattedDecimals3 = someDecimals.map(curriedFormatter("%16.14f"))
 
-  // Continue here:
-  // Advanced Functional Programming - Currying and Partially Applied Functions - 23:00
+  // By-name vs. zero-param lambdas and methods vs. functions
+  def byName(n: => Int) = n + 1
+  def byLambda(f: () => Int) = f() + 1
+
+  def method: Int = 42
+  def parenMethod(): Int = 42
+
+  byName(23) // 24
+  byName(method) // 43, no Eta expansion, method invoked here
+  byName(parenMethod()) // 43
+  // byName(parenMethod) // Doesn't compile, "[...] must be called with () argument"
+  byName((() => 42)()) // 43
+  // byName(() => 42) // Doesn't compile, "Found: () => Int, Required: Int"
+
+  // byLambda(23) // Doesn't compile, "Found: (23 : Int), Required: () => Int"
+  // byLambda(method) // Doesn't compile, Eta expansion not possible here
+  byLambda(parenMethod) // 43, Eta expansion done here
+  byLambda(() => 42) // 43
+  byLambda(() => parenMethod()) // 43
 
   def main(args: Array[String]): Unit = {
     println(danielsGreeting)
