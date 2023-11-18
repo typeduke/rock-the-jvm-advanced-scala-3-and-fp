@@ -40,14 +40,46 @@ object LazyEvaluation {
   // `lazy` use case 2:
   // `withFilter`
 
-  // Continue here:
-  // Advanced Functional Programming - Lazy Evaluation - 8:00
+  def lessThanThirty(i: Int): Boolean = {
+    println(s"$i is less than 30?")
+    i < 30
+  }
+
+  def greaterThanTwenty(i: Int): Boolean = {
+    println(s"$i is greater than 20?")
+    i > 20
+  }
+
+  val numbers = List(1, 25, 40, 5, 23)
+
+  def demoFilter(): Unit = {
+    val filteredOnce = numbers.filter(lessThanThirty)
+    val filteredTwice = filteredOnce.filter(greaterThanTwenty)
+    println(filteredTwice)
+  }
+
+  def demoWithFilter(): Unit = {
+    // `withFilter` uses lazy evaluation internally, only tests elems against predicates on demand.
+    val filteredOnce = numbers.withFilter(lessThanThirty)
+    val filteredTwice = filteredOnce.withFilter(greaterThanTwenty)
+    println(filteredTwice.map(identity)) // Applying `identity` constitutes such demand.
+  }
+
+  def demoForComp(): Unit = {
+    // For comprehensions use `withFilter` internally.
+    val forComp = for {
+      n <- numbers if lessThanThirty(n) && greaterThanTwenty(n)
+    } yield n // Inevitably, with for comprehensions, map is called, so no manual call is needed.
+    println(forComp)
+  }
 
   def main(args: Array[String]): Unit = {
     // `lazy` use case 1
-    demoByName()
-    demoByNeed()
+    // demoByName()
+    // demoByNeed()
 
     // `lazy` use case 2
+    demoFilter()
+    demoWithFilter()
   }
 }
