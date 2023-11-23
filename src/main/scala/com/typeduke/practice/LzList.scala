@@ -8,7 +8,7 @@ abstract class LzList[A] {
 
   // Utilities
   def #::(elem: A): LzList[A] // Prepending
-  def ++(other: LzList[A]): LzList[A] // TODO Warning
+  def ++(other: LzList[A]): LzList[A]
 
   // "Classics"
   def foreach[B](f: A => Unit): Unit
@@ -27,9 +27,6 @@ abstract class LzList[A] {
     toListAux(this, List())
   }
 }
-
-// Continue here:
-// Advanced Functional Programming - Lazy Evaluation Practice: A Potentially Infinite List - 15:30
 
 case class LzEmpty[A]() extends LzList[A] {
   override def isEmpty: Boolean = true
@@ -50,24 +47,45 @@ case class LzEmpty[A]() extends LzList[A] {
 }
 
 class LzCons[A](hd: => A, tl: => LzList[A]) extends LzList[A] {
-  override def isEmpty: Boolean = ???
-  override def head: A = ???
-  override def tail: LzList[A] = ???
+  override def isEmpty: Boolean = false
 
-  override def #::(elem: A): LzList[A] = ???
-  override def ++(other: LzList[A]): LzList[A] = ???
+  // Use call by need
+  override lazy val head: A = this.hd
+  override lazy val tail: LzList[A] = this.tl
 
-  override def foreach[B](f: A => Unit): Unit = ???
-  override def map[B](f: A => B): LzList[B] = ???
-  override def flatMap[B](f: A => LzList[B]): LzList[B] = ???
-  override def filter(predicate: A => Boolean): LzList[A] = ???
+  override def #::(elem: A): LzList[A] = new LzCons(elem, this)
+  override def ++(other: LzList[A]): LzList[A] = new LzCons(this.head, this.tail ++ other) // TODO
 
-  override def take(n: Int): LzList[A] = ???
+  override def foreach[B](f: A => Unit): Unit = {
+    f(this.head)
+    tail.foreach(f)
+  }
+
+  override def map[B](f: A => B): LzList[B] =
+    new LzCons(f(this.head), this.tail.map(f))
+
+  override def flatMap[B](f: A => LzList[B]): LzList[B] =
+    f(this.head) ++ this.tail.flatMap(f)
+
+  override def filter(predicate: A => Boolean): LzList[A] =
+    if (predicate(this.head)) new LzCons(this.head, this.tail.filter(predicate))
+    else this.tail.filter(predicate) // TODO
+
+  override def take(n: Int): LzList[A] =
+    if (n <= 0) LzEmpty()
+    else if (n == 1) new LzCons(this.head, LzEmpty())
+    else new LzCons(this.head, this.tail.take(n - 1))
 }
 
 object LzList {
-  def generate[A](start: A)(generator: A => A): LzList[A] = ???
-  def from[A](list: List[A]): LzList[A] = ???
+  def empty[A]: LzList[A] = LzEmpty()
+
+  def generate[A](start: A)(generator: A => A): LzList[A] =
+    new LzCons(start, LzList.generate(generator(start))(generator))
+
+  def from[A](list: List[A]): LzList[A] = list.foldLeft(this.empty) { (currentLzList, newElem) =>
+    new LzCons(newElem, currentLzList)
+  }
 }
 
 object LzListPlayground {
